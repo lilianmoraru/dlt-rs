@@ -1,0 +1,20 @@
+[package]
+name          = "dlt-sys"
+version       = "0.1.0"
+authors       = ["Lilian A. Moraru <lilian.moraru90@gmail.com>"]
+license       = "MIT/Apache-2.0"
+readme        = "../README.md"
+homepage      = "https://github.com/lilianmoraru/dlt-rs"
+repository    = "https://github.com/lilianmoraru/dlt-rs"
+documentation = "https://docs.rs/dlt-sys"
+categories    = ["log", "dlt"]
+build         = "build.rs"
+
+description   = "FFI bindings for GENIVI DLT"
+
+[dependencies]
+libc    = "0.2"
+
+[build-dependencies]
+gcc   = "0.3"
+cmake = "0.1"

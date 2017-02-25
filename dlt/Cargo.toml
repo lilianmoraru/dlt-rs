@@ -1,0 +1,17 @@
+[package]
+name          = "dlt"
+version       = "0.1.0"
+authors       = ["Lilian A. Moraru <lilian.moraru90@gmail.com>"]
+license       = "MIT/Apache-2.0"
+readme        = "../README.md"
+homepage      = "https://github.com/lilianmoraru/dlt-rs"
+repository    = "https://github.com/lilianmoraru/dlt-rs"
+documentation = "https://docs.rs/dlt"
+categories    = ["log", "dlt"]
+#build         = "build.rs"
+
+description   = "GENIVI DLT implementation of `log`"
+
+[dependencies]
+libc    = "0.2"
+dlt-sys = { version = "0.1.0", path = "../dlt-sys" }

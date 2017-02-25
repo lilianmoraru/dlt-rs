@@ -1,0 +1,2 @@
+[workspace]
+members = ["dlt", "dlt-sys"]
