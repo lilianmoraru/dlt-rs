@@ -1,11 +1,9 @@
-use libc::{ c_int, c_uint };
-
-pub type pid_t   = c_int;
-pub type speed_t = c_uint;
+use libc::{ c_int };
 
 pub static UINT16_MAX: u16 = 65535;
 
 /// Definitions of DLT return values
+#[repr(C)]
 pub enum DltReturnValue {
     DLT_RETURN_LOGGING_DISABLED,
     DLT_RETURN_USER_BUFFER_FULL,
@@ -19,6 +17,7 @@ pub enum DltReturnValue {
 }
 
 /// Definitions of DLT log level
+#[repr(C)]
 pub enum DltLogLevelType {
     /// Default log level
     DLT_LOG_DEFAULT,
@@ -41,6 +40,7 @@ pub enum DltLogLevelType {
 }
 
 /// Definitions of DLT Format
+#[repr(C)]
 pub enum DltFormatType {
     /// No special format
     DLT_FORMAT_DEFAULT,
@@ -61,6 +61,7 @@ pub enum DltFormatType {
 }
 
 /// Definitions of DLT trace status
+#[repr(C)]
 pub enum DltTraceStatusType {
     /// Default trace status
     DLT_TRACE_STATUS_DEFAULT,
@@ -74,6 +75,7 @@ pub enum DltTraceStatusType {
 
 /// Definitions for dlt_user_trace_network/DLT_TRACE_NETWORK()
 /// as defined in the DLT protocol
+#[repr(C)]
 pub enum DltNetworkTraceType {
     /// Interprocess communication
     DLT_NW_TRACE_IPC,
@@ -99,6 +101,7 @@ pub enum DltNetworkTraceType {
 }
 
 /// This are the log modes
+#[repr(C)]
 pub enum DltUserLogMode {
     DLT_USER_MODE_UNDEFINED,
     DLT_USER_MODE_OFF,
