@@ -1,6 +1,6 @@
-use libc::{ c_int, size_t, c_char, c_uchar, c_void, pthread_t, mqd_t };
+use libc::{ c_int, c_uint, size_t, c_char, c_uchar, c_void, pthread_t, mqd_t };
 
-use dlt_types::DltReturnValue;
+use dlt_types::{ DltReturnValue, DltLogLevelType, DltFormatType, DltNetworkTraceType, DltUserLogMode, DltTraceStatusType };
 use dlt_common::{ DltBuffer, DltReceiver, DLT_ID_SIZE };
 
 /// Maximum size of each user buffer, also used for injection buffer
@@ -45,7 +45,7 @@ pub struct DltContextData {
 #[repr(C)]
 pub struct DltUserInjectionCallback {
     pub service_id: u32,
-    pub injection_callback: fn(service_id: u32, data: *mut c_void, length: u32) -> c_int
+    pub injection_callback: extern fn(service_id: u32, data: *mut c_void, length: u32) -> c_int
 }
 
 #[repr(C)]
@@ -56,7 +56,7 @@ pub struct DltUserLogLevelChangedCallback {
     pub log_level: i8,
     /// Trace status
     pub trace_status: i8,
-    pub log_level_changed_callback: fn(context_id: [c_char; DLT_ID_SIZE], log_level: u8, trace_status: u8)
+    pub log_level_changed_callback: extern fn(context_id: [c_char; DLT_ID_SIZE], log_level: u8, trace_status: u8)
 }
 
 /// This structure is used in a table managing all contexts and the corresponding log levels in an application
@@ -79,7 +79,7 @@ pub struct dlt_ll_ts_type {
     pub nrcallbacks: u32,
 
     /// Log level changed callback
-    pub log_level_changed_callback: fn(context_id: [c_char; DLT_ID_SIZE], log_level: u8, trace_status: u8)
+    pub log_level_changed_callback: extern fn(context_id: [c_char; DLT_ID_SIZE], log_level: u8, trace_status: u8)
 }
 
 /// This structure holds initial log-level for given appId:ctxId pair
@@ -151,83 +151,83 @@ pub struct DltUser {
 }
 
 extern {
-//DltReturnValue dlt_user_log_write_start(DltContext *handle, DltContextData *log, DltLogLevelType loglevel);
-//DltReturnValue dlt_user_log_write_start_id(DltContext *handle, DltContextData *log, DltLogLevelType loglevel, uint32_t messageid);
-//DltReturnValue dlt_user_log_write_finish(DltContextData *log);
-//
-//DltReturnValue dlt_user_log_write_bool(DltContextData *log, uint8_t data);
-//
-//DltReturnValue dlt_user_log_write_float32(DltContextData *log, float32_t data);
-//DltReturnValue dlt_user_log_write_float64(DltContextData *log, double data);
-//
-//DltReturnValue dlt_user_log_write_uint(DltContextData *log, unsigned int data);
-//DltReturnValue dlt_user_log_write_uint8(DltContextData *log, uint8_t data);
-//DltReturnValue dlt_user_log_write_uint16(DltContextData *log, uint16_t data);
-//DltReturnValue dlt_user_log_write_uint32(DltContextData *log, uint32_t data);
-//DltReturnValue dlt_user_log_write_uint64(DltContextData *log, uint64_t data);
-//
-//DltReturnValue dlt_user_log_write_uint8_formatted(DltContextData *log, uint8_t data, DltFormatType type);
-//DltReturnValue dlt_user_log_write_uint16_formatted(DltContextData *log, uint16_t data, DltFormatType type);
-//DltReturnValue dlt_user_log_write_uint32_formatted(DltContextData *log, uint32_t data, DltFormatType type);
-//DltReturnValue dlt_user_log_write_uint64_formatted(DltContextData *log, uint64_t data, DltFormatType type);
-//
-//DltReturnValue dlt_user_log_write_ptr(DltContextData *log, void *data);
-//DltReturnValue dlt_user_log_write_int(DltContextData *log, int data);
-//DltReturnValue dlt_user_log_write_int8(DltContextData *log, int8_t data);
-//DltReturnValue dlt_user_log_write_int16(DltContextData *log, int16_t data);
-//DltReturnValue dlt_user_log_write_int32(DltContextData *log, int32_t data);
-//DltReturnValue dlt_user_log_write_int64(DltContextData *log, int64_t data);
-//
-//DltReturnValue dlt_user_log_write_string( DltContextData *log, const char *text);
-//DltReturnValue dlt_user_log_write_constant_string( DltContextData *log, const char *text);
-//DltReturnValue dlt_user_log_write_utf8_string(DltContextData *log, const char *text);
-//DltReturnValue dlt_user_log_write_raw(DltContextData *log,void *data,uint16_t length);
-//DltReturnValue dlt_user_log_write_raw_formatted(DltContextData *log,void *data,uint16_t length,DltFormatType type);
-//DltReturnValue dlt_user_trace_network(DltContext *handle, DltNetworkTraceType nw_trace_type, uint16_t header_len, void *header, uint16_t payload_len, void *payload);
-//DltReturnValue dlt_user_trace_network_truncated(DltContext *handle, DltNetworkTraceType nw_trace_type, uint16_t header_len, void *header, uint16_t payload_len, void *payload, int allow_truncate);
-//DltReturnValue dlt_user_trace_network_segmented(DltContext *handle, DltNetworkTraceType nw_trace_type, uint16_t header_len, void *header, uint16_t payload_len, void *payload);
-//
-//// The following API functions define a high level function interface for DLT
-//DltReturnValue dlt_init();
-//DltReturnValue dlt_init_file(const char *name);
-//DltReturnValue dlt_free();
-//DltReturnValue dlt_check_library_version(const char * user_major_version, const char * user_minor_version);
-//DltReturnValue dlt_register_app(const char *appid, const char * description);
-//DltReturnValue dlt_unregister_app(void);
-//DltReturnValue dlt_register_context(DltContext *handle, const char *contextid, const char * description);
-//DltReturnValue dlt_register_context_ll_ts(DltContext *handle, const char *contextid, const char * description, int loglevel, int tracestatus);
-//DltReturnValue dlt_unregister_context(DltContext *handle);
-//int dlt_set_resend_timeout_atexit(uint32_t timeout_in_milliseconds);
-//DltReturnValue dlt_set_log_mode(DltUserLogMode mode);
-//int dlt_get_log_state();
-//DltReturnValue dlt_register_injection_callback(DltContext *handle, uint32_t service_id,
-//int (*dlt_injection_callback)(uint32_t service_id, void *data, uint32_t length));
-//DltReturnValue dlt_register_log_level_changed_callback(DltContext *handle,
-//void (*dlt_log_level_changed_callback)(char context_id[DLT_ID_SIZE],uint8_t log_level, uint8_t trace_status));
-//DltReturnValue dlt_verbose_mode(void);
-//DltReturnValue dlt_user_check_library_version(const char *user_major_version,const char *user_minor_version);
-//DltReturnValue dlt_nonverbose_mode(void);
-//DltReturnValue dlt_use_extended_header_for_non_verbose(int8_t use_extende_header_for_non_verbose);
-//DltReturnValue dlt_with_session_id(int8_t with_session_id);
-//DltReturnValue dlt_with_timestamp(int8_t with_timestamp);
-//DltReturnValue dlt_with_ecu_id(int8_t with_ecu_id);
-//DltReturnValue dlt_set_application_ll_ts_limit(DltLogLevelType loglevel, DltTraceStatusType tracestatus);
-//int dlt_env_adjust_ll_from_env(dlt_env_ll_set const * const ll_set, char const * const apid, char const * const ctid, int const ll);
-//int dlt_env_extract_ll_set(char ** const env, dlt_env_ll_set * const ll_set);
-//void dlt_env_free_ll_set(dlt_env_ll_set * const ll_set);
-//DltReturnValue dlt_enable_local_print(void);
-//DltReturnValue dlt_disable_local_print(void);
-//DltReturnValue dlt_log_string(DltContext *handle,DltLogLevelType loglevel, const char *text);
-//DltReturnValue dlt_log_string_int(DltContext *handle,DltLogLevelType loglevel, const char *text, int data);
-//DltReturnValue dlt_log_string_uint(DltContext *handle,DltLogLevelType loglevel, const char *text, unsigned int data);
-//DltReturnValue dlt_log_int(DltContext *handle,DltLogLevelType loglevel, int data);
-//DltReturnValue dlt_log_uint(DltContext *handle,DltLogLevelType loglevel, unsigned int data);
-//DltReturnValue dlt_log_raw(DltContext *handle,DltLogLevelType loglevel, void *data,uint16_t length);
-//DltReturnValue dlt_log_marker();
-//DltReturnValue dlt_forward_msg(void *msgdata,size_t size);
-//DltReturnValue dlt_user_check_buffer(int *total_size, int *used_size);
-//int dlt_user_atexit_blow_out_user_buffer(void);
-//DltReturnValue dlt_user_log_resend_buffer(void);
+    fn dlt_user_log_write_start(handle: *mut DltContext, log: *mut DltContextData, loglevel: DltLogLevelType) -> DltReturnValue;
+    fn dlt_user_log_write_start_id(handle: *mut DltContext, log: *mut DltContextData, loglevel: DltLogLevelType, messageid: u32) -> DltReturnValue;
+    fn dlt_user_log_write_finish(log: *mut DltContextData) -> DltReturnValue;
+
+    fn dlt_user_log_write_bool(log: *mut DltContextData, data: u8) -> DltReturnValue;
+
+    fn dlt_user_log_write_float32(log: *mut DltContextData, data: f32) -> DltReturnValue;
+    fn dlt_user_log_write_float64(log: *mut DltContextData, data: f64) -> DltReturnValue;
+
+    fn dlt_user_log_write_uint(log: *mut DltContextData, data: c_uint) -> DltReturnValue;
+    fn dlt_user_log_write_uint8(log: *mut DltContextData, data: u8) -> DltReturnValue;
+    fn dlt_user_log_write_uint16(log: *mut DltContextData, data: u16) -> DltReturnValue;
+    fn dlt_user_log_write_uint32(log: *mut DltContextData, data: u32) -> DltReturnValue;
+    fn dlt_user_log_write_uint64(log: *mut DltContextData, data: u64) -> DltReturnValue;
+
+    fn dlt_user_log_write_uint8_formatted(log: *mut DltContextData, data: u8, _type: DltFormatType) -> DltReturnValue;
+    fn dlt_user_log_write_uint16_formatted(log: *mut DltContextData, data: u16, _type: DltFormatType) -> DltReturnValue;
+    fn dlt_user_log_write_uint32_formatted(log: *mut DltContextData, data: u32, _type: DltFormatType) -> DltReturnValue;
+    fn dlt_user_log_write_uint64_formatted(log: *mut DltContextData, data: u64, _type: DltFormatType) -> DltReturnValue;
+
+    fn dlt_user_log_write_ptr(log: *mut DltContextData, data: *mut c_void) -> DltReturnValue;
+
+    fn dlt_user_log_write_int(log: *mut DltContextData, data: c_int) -> DltReturnValue;
+    fn dlt_user_log_write_int8(log: *mut DltContextData, data: i8) -> DltReturnValue;
+    fn dlt_user_log_write_int16(log: *mut DltContextData, data: i16) -> DltReturnValue;
+    fn dlt_user_log_write_int32(log: *mut DltContextData, data: i32) -> DltReturnValue;
+    fn dlt_user_log_write_int64(log: *mut DltContextData, data: i64) -> DltReturnValue;
+
+    fn dlt_user_log_write_string(log: *mut DltContextData, text: *const c_char) -> DltReturnValue;
+    fn dlt_user_log_write_constant_string(log: *mut DltContextData, text: *const c_char) -> DltReturnValue;
+    fn dlt_user_log_write_utf8_string(log: *mut DltContextData, text: *const c_char) -> DltReturnValue;
+    fn dlt_user_log_write_raw(log: *mut DltContextData, data: *mut c_void, length: u16) -> DltReturnValue;
+    fn dlt_user_log_write_raw_formatted(log: *mut DltContextData, data: *mut c_void, length: u16, _type: DltFormatType) -> DltReturnValue;
+
+    fn dlt_user_trace_network(handle: *mut DltContext, nw_trace_type: DltNetworkTraceType, header_len: u16, header: *mut c_void, payload_len: u16, payload: *mut c_void) -> DltReturnValue;
+    fn dlt_user_trace_network_truncated(handle: *mut DltContext, nw_trace_type: DltNetworkTraceType, header_len: u16, header: *mut c_void, payload_len: u16, payload: *mut c_void, allow_truncate: c_int) -> DltReturnValue;
+    fn dlt_user_trace_network_segmented(handle: *mut DltContext, nw_trace_type: DltNetworkTraceType, header_len: u16, header: *mut c_void, payload_len: u16, payload: *mut c_void) -> DltReturnValue;
+
+    //// The following API functions define a high level function interface for DLT
+    fn dlt_init() -> DltReturnValue;
+    fn dlt_init_file(name: *const c_char) -> DltReturnValue;
+    fn dlt_free() -> DltReturnValue;
+    fn dlt_check_library_version(user_major_version: *const c_char, user_minor_version: *const c_char) -> DltReturnValue;
+    fn dlt_register_app(appid: *const c_char, description: *const c_char) -> DltReturnValue;
+    fn dlt_unregister_app() -> DltReturnValue;
+    fn dlt_register_context(handle: *mut DltContext, contextid: *const c_char, description: *const c_char) -> DltReturnValue;
+    fn dlt_register_context_ll_ts(handle: *mut DltContext, contextid: *const c_char, description: *const c_char, loglevel: c_int, tracestatus: c_int) -> DltReturnValue;
+    fn dlt_unregister_context(handle: *mut DltContext) -> DltReturnValue;
+    fn dlt_set_resend_timeout_atexit(timeout_in_milliseconds: u32) -> c_int;
+    fn dlt_set_log_mode(mode: DltUserLogMode) -> DltReturnValue;
+    fn dlt_get_log_state() -> c_int;
+    fn dlt_register_injection_callback(handle: *mut DltContext, service_id: u32, dlt_injection_callback: extern fn (_service_id: u32, data: *mut c_void, length: u32) -> c_int) -> DltReturnValue;
+    fn dlt_register_log_level_changed_callback(handle: *mut DltContext, dlt_log_level_changed_callback: extern fn (context_id: [c_char; DLT_ID_SIZE], log_level: u8, trace_status: u8)) -> DltReturnValue;
+    fn dlt_verbose_mode() -> DltReturnValue;
+    fn dlt_user_check_library_version(user_major_version: *const c_char, user_minor_version: *const c_char) -> DltReturnValue;
+    fn dlt_nonverbose_mode() -> DltReturnValue;
+    fn dlt_use_extended_header_for_non_verbose(use_extende_header_for_non_verbose: i8) -> DltReturnValue;
+    fn dlt_with_session_id(with_session_id: i8) -> DltReturnValue;
+    fn dlt_with_timestamp(with_timestamp: i8) -> DltReturnValue;
+    fn dlt_with_ecu_id(with_ecu_id: i8) -> DltReturnValue;
+    fn dlt_set_application_ll_ts_limit(loglevel: DltLogLevelType, tracestatus: DltTraceStatusType) -> DltReturnValue;
+    fn dlt_env_adjust_ll_from_env(ll_set: *const dlt_env_ll_set, apid: *const c_char, ctid: *const c_char, ll: c_int) -> c_int;
+    fn dlt_env_extract_ll_set(env: *mut *mut c_char, ll_set: *mut dlt_env_ll_set) -> c_int;
+    fn dlt_env_free_ll_set(ll_set: *mut dlt_env_ll_set);
+    fn dlt_enable_local_print() -> DltReturnValue;
+    fn dlt_disable_local_print() -> DltReturnValue;
+    fn dlt_log_string(handle: *mut DltContext, loglevel: DltLogLevelType, text: *const c_char) -> DltReturnValue;
+    fn dlt_log_string_int(handle: *mut DltContext, loglevel: DltLogLevelType, text: *const c_char, data: c_int) -> DltReturnValue;
+    fn dlt_log_string_uint(handle: *mut DltContext, loglevel: DltLogLevelType, text: *const c_char, data: c_uint) -> DltReturnValue;
+    fn dlt_log_int(handle: *mut DltContext, loglevel: DltLogLevelType, data: c_int) -> DltReturnValue;
+    fn dlt_log_uint(handle: *mut DltContext, loglevel: DltLogLevelType, data: c_uint) -> DltReturnValue;
+    fn dlt_log_raw(handle: *mut DltContext, loglevel: DltLogLevelType, data: *mut c_void, length: u16) -> DltReturnValue;
+    fn dlt_log_marker() -> DltReturnValue;
+    fn dlt_forward_msg(msgdata: *mut c_void, size: size_t) -> DltReturnValue;
+    fn dlt_user_check_buffer(total_size: *mut c_int, used_size: *mut c_int) -> DltReturnValue;
+    fn dlt_user_atexit_blow_out_user_buffer() -> c_int;
+    fn dlt_user_log_resend_buffer() -> DltReturnValue;
 
 // #ifdef DLT_TEST_ENABLE
 //void dlt_user_test_corrupt_user_header(int enable);
