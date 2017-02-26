@@ -2,8 +2,10 @@ use libc::{ c_int, c_uint, c_long, size_t, c_char, c_uchar, c_void, speed_t, FIL
 
 use dlt_types::DltReturnValue;
 
-const DLT_ID_SIZE:    usize = 4;
-const DLT_FILTER_MAX: usize = 30;
+/// The size of a DLT ID
+pub const DLT_ID_SIZE:    usize = 4;
+/// Maximum number of filters
+pub const DLT_FILTER_MAX: usize = 30;
 
 /// The structure of the DLT file storage header.
 /// This header is used before each stored DLT message
