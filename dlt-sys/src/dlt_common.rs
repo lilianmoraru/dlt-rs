@@ -119,9 +119,9 @@ pub struct DltMessage {
 #[derive(Debug, Clone, Copy)]
 pub struct DltFilter {
     /// Application id
-    pub apid: [[c_char; DLT_FILTER_MAX]; DLT_ID_SIZE],
+    pub apid: [[c_char; DLT_ID_SIZE]; DLT_FILTER_MAX],
     /// Context id
-    pub ctid: [[c_char; DLT_FILTER_MAX]; DLT_ID_SIZE],
+    pub ctid: [[c_char; DLT_ID_SIZE]; DLT_FILTER_MAX],
     /// Number of filters
     pub counter: c_int
 }
