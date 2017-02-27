@@ -202,49 +202,492 @@ pub struct DltBuffer {
 }
 
 extern {
+    /// Helper function to print a byte array in hex.
+    ///
+    /// `ptr` - pointer to the byte array
+    ///
+    /// `size` - number of bytes to be printed
     pub fn dlt_print_hex(ptr: *mut u8, size: c_int);
+
+    /// Helper function to print a byte array in hex into a string.
+    ///
+    /// `text` - pointer to a ASCII string, in which the text is written
+    ///
+    /// `textlength` - maximal size of text buffer
+    ///
+    /// `ptr` - pointer to the byte array
+    ///
+    /// `size` - number of bytes to be printed
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_print_hex_string(text: *mut c_char, textlength: c_int, ptr: *mut u8, size: c_int) -> DltReturnValue;
+
+    /// Helper function to print a byte array in hex and ascii into a string.
+    ///
+    /// `text` - pointer to an ASCII string, in which the text is written
+    ///
+    /// `textlength` - maximal size of text buffer
+    ///
+    /// `ptr` - pointer to the byte array
+    ///
+    /// `size` - number of bytes to be printed
+    ///
+    /// `html` - output is html? 0 - false, 1 - true
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_print_mixed_string(text: *mut c_char, textlength: c_int, ptr: *mut u8, size: c_int, html: c_int) -> DltReturnValue;
+
+    /// Helper function to print a byte array in ascii into a string.
+    ///
+    /// `text` - pointer to an ASCII string, in which the text is written
+    ///
+    /// `textlength` - maximal size of text buffer
+    ///
+    /// `ptr` - pointer to the byte array
+    ///
+    /// `size` - number of bytes to be printed
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_print_char_string(text: *mut *mut c_char, textlength: c_int, ptr: *mut u8, size: c_int) -> DltReturnValue;
+
+    /// Helper function to print an ID.
+    ///
+    /// `text` - pointer to ASCII string where to write the ID
+    ///
+    /// `id` - four byte char array as used in DLT messages as IDs
     pub fn dlt_print_id(text: *mut c_char, id: *const c_char);
+
+    /// Helper function to set an ID parameter.
+    ///
+    /// `id` - four byte char array as used in DLT messages as IDs
+    ///
+    /// `text` - string to be copied into char array
     pub fn dlt_set_id(id: *mut c_char, text: *const c_char);
+
+    /// Helper function to remove not nice to print characters, e.g. NULL or carage return.
+    ///
+    /// `text` - pointer to string to be claned
+    ///
+    /// `length` - length of string excluding terminating zero
     pub fn dlt_clean_string(text: *mut c_char, length: c_int);
+
+    /// Initialise the filter list.
+    /// This function must be called before using further dlt filter.
+    ///
+    /// `filter` - pointer to structure of organising DLT filter
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_filter_init(filter: *mut DltFilter, verbose: c_int) -> DltReturnValue;
+
+    /// Free the used memory by the organising structure of filter.
+    ///
+    /// `filter` - pointer to structure of organising DLT filter
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_filter_free(filter: *mut DltFilter, verbose: c_int) -> DltReturnValue;
+
+    /// Load filter list from file.
+    ///
+    /// `filter` - pointer to structure of organising DLT filter
+    ///
+    /// `filename` - filename to load filter from
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_filter_load(filter: *mut DltFilter, filename: *const c_char, verbose: c_int) -> DltReturnValue;
+
+    /// Save filter list to file.
+    ///
+    /// `filter` - pointer to structure of organising DLT filter
+    ///
+    /// `filename` - filename to load filters from
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_filter_save(filter: *mut DltFilter, filename: *const c_char, verbose: c_int) -> DltReturnValue;
+
+    /// Find index of filter in filter list.
+    ///
+    /// `filter` - pointer to structure of organising DLT filter
+    ///
+    /// `apid` - application ID to be found in filter list
+    ///
+    /// `ctid` - context ID to be found in filter list
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error(or not found), else return index of filter
     pub fn dlt_filter_find(filter: *mut DltFilter, apid: *const c_char, ctid: *const c_char, verbose: c_int) -> c_int;
+
+    /// Add new filter to filter list.
+    ///
+    /// `filter` - pointer to structure of organising DLT filter
+    ///
+    /// `apid` - application ID to be added to filter list (must always be set)
+    ///
+    /// `ctid` - context ID to be added to filter list(empty equals don't care)
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_filter_add(filter: *mut DltFilter, apid: *const c_char, ctid: *const c_char, verbose: c_int) -> DltReturnValue;
+
+    /// Delete filter from filter list.
+    ///
+    /// `filter` - pointer to structure of organising DLT filter
+    ///
+    /// `apid` - application ID to be deleted from filter list
+    ///
+    /// `ctid` - context ID to be deleted from filter list
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_filter_delete(filter: *mut DltFilter, apid: *const c_char, ctid: *const c_char, verbose: c_int) -> DltReturnValue;
+
+    /// Initialise the structure used to access a DLT message.
+    /// This function must be called before using further dlt_message functions.
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_init(msg: *mut DltMessage, verbose: c_int) -> DltReturnValue;
+
+    /// Free the used memory by the organising structure of file.
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_free(msg: *mut DltMessage, verbose: c_int) -> DltReturnValue;
+
+    /// Print Header into an ASCII string.
+    /// This function calls dlt_message_header_flags() with flags=DLT_HEADER_SHOW_ALL
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the header is written
+    ///
+    /// `textlength` - maximal size of text buffer
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_header(msg: *mut DltMessage, text: *mut c_char, textlength: c_int, verbose: c_int) -> DltReturnValue;
+
+    /// Print Header into an ASCII string, selective.
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the header is written
+    ///
+    /// `textlength` - maximal size of text buffer
+    ///
+    /// `flags` - select, bit-field to select, what should be printed(DLT_HEADER_SHOW_...)
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_header_flags(msg: *mut DltMessage, text: *mut c_char, textlength: c_int, flags: c_int, verbose: c_int) -> DltReturnValue;
+
+    /// Print Payload into an ASCII string.
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the header is written
+    ///
+    /// `textlength` - maximal size of text buffer
+    ///
+    /// `_type` - 1 = payload as hex, 2 = payload as ASCII
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_payload(msg: *mut DltMessage, text: *mut c_char, textlength: c_int, _type: c_int, verbose: c_int) -> DltReturnValue;
+
+    /// Check if message is filtered or not. All filters are applied(logical OR).
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `filter` - pointer to filter
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// `1` = filter matches, `0` = filter does not match, negative value if there was an error
     pub fn dlt_message_filter_check(msg: *mut DltMessage, filter: *mut DltFilter, verbose: c_int) -> DltReturnValue;
+
+    /// Read message from memory buffer.
+    /// Message in buffer has no storage header.
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `buffer` - pointer to memory buffer
+    ///
+    /// `length` - length of message in buffer
+    ///
+    /// `resync` - if set to true, resync to serial header is enforced
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_read(msg: *mut DltMessage, buffer: *mut u8, length: c_uint, resync: c_int, verbose: c_int) -> c_int;
+
+    /// Get standard header extra parameters
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_get_extraparameters(msg: *mut DltMessage, verbose: c_int) -> DltReturnValue;
+
+    /// Set standard header extra parameters
+    ///
+    /// `msg` -pointer to structure of organising access to DLT messages
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_set_extraparameters(msg: *mut DltMessage, verbose: c_int) -> DltReturnValue;
+
+    /// Initialise the structure used to access a DLT file.
+    /// This function must be called before using further dlt_file functions.
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_init(file: *mut DltFile, verbose: c_int) -> DltReturnValue;
+
+    /// Set a list of filters.
+    /// This function should be called before loading a DLT file, if filter shoudl be used.
+    /// A filter list is an array of filters. Several filters are combined logically by an OR operation.
+    /// **The filter list is not copied - take care to keep the list in memory**.
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `filter` - pointer to filter list array
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_set_filter(file: *mut DltFile, filter: *mut DltFilter, verbose: c_int) -> DltReturnValue;
+
+    /// Initialising loading a DLT file.
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `filename` - filename of DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_open(file: *mut DltFile, filename: *const c_char, verbose: c_int) -> DltReturnValue;
+
+    /// Find next message in the DLT file and parse them.
+    /// This function finds the next message in the DLT file.
+    /// If a filter is set, the filter list is used.
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// `0` = message does not match filter, `1` = message was read, negative value if there was an error
     pub fn dlt_file_read(file: *mut DltFile, verbose: c_int) -> DltReturnValue;
+
+    /// Find next message in the DLT file in RAW format(without storage header) and parse them.
+    /// This function finds the next message in the DLT file.
+    /// If a filter is set, the filter list is used.
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `resync` - Resync to serial header when set to true
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// `0` = message does not match filter, `1` = message was read, negative value if there was an error
     pub fn dlt_file_read_raw(file: *mut DltFile, resync: c_int, verbose: c_int) -> DltReturnValue;
+
+    /// Closing loading a DLT file.
+    ///
+    /// `file` - pointer to strucutre of organising access to DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_close(file: *mut DltFile, verbose: c_int) -> DltReturnValue;
+
+    /// Load standard header of a message from file
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_read_header(file: *mut DltFile, verbose: c_int) -> DltReturnValue;
+
+    /// Load standard header of a message from file in RAW format(without storage header)
+    ///
+    /// `file` - pointer to strucutre of organisning access to DLT file
+    ///
+    /// `resync` - Resync to serial header when set to true
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_read_header_raw(file: *mut DltFile, resync: c_int, verbose: c_int) -> DltReturnValue;
+
+    /// Load, if available in message, extra standard header field and
+    /// extended header of a message from file
+    /// (**dlt_file_read_header() must have been called before this call!**)
+    ///
+    /// `file` - pointer to strucutre of organising access to DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_read_header_extended(file: *mut DltFile, verbose: c_int) -> DltReturnValue;
+
+    /// Load payload of a message from file
+    /// (**dlt_file_read_header() must have been called before this call!**)
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_read_data(file: *mut DltFile, verbose: c_int) -> DltReturnValue;
+
+    /// Load header and payload of a message selected by the index.
+    /// If filter are set, index is based on the filtered list.
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `index` - position of message in the files beginning from zero
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Number of messages loaded, negative value if there was an error
     pub fn dlt_file_message(file: *mut DltFile, index: c_int, verbose: c_int) -> DltReturnValue;
+
+    /// Free the used memory by the organising structure of file.
+    ///
+    /// `file` - pointer to structure of organising access to DLT file
+    ///
+    /// `verbose` - if set to true, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_file_free(file: *mut DltFile, verbose: c_int) -> DltReturnValue;
+
+    /// Set internal logging filename if mode 2
+    ///
+    /// `filename` - the filename
     pub fn dlt_log_set_filename(filename: *const c_char);
+
+    /// Set internal logging level
+    ///
+    /// `level` - the level
     pub fn dlt_log_set_level(level: c_int);
+
+    /// Initialize(external) logging facility
+    ///
+    /// `mode` - positive, `0` = log to stdout, `1` = log to syslog, `2` = log to file
     pub fn dlt_log_init(mode: c_int);
+
+    /// Log ASCII string with null-termination to (external) logging facility
+    ///
+    /// `prio` - priority(see syslog() call)
+    ///
+    /// `s` - pointer to an ASCII string with null-termination
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_log(prio: c_int, s: *mut c_char) -> DltReturnValue;
+
+    /// Log with variable arguments to (external) logging facility (like printf)
+    ///
+    /// `prio` - priority (see syslog() call)
+    ///
+    /// `format` - format string for log message
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_vlog(prio: c_int, format: *const c_char, ...) -> DltReturnValue;
+
+    /// Log size bytes with variable arguments to (external) logging facility (similar to snprintf)
+    ///
+    /// `prio` - priority (see syslog() call)
+    ///
+    /// `size` - number of bytes to log
+    ///
+    /// `format` - format string for log message
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_vnlog(prio: c_int, size: size_t, format: *const c_char, ...) -> DltReturnValue;
+
+    /// De-Initialize (external) logging facility
     pub fn dlt_log_free();
+
+    /// Initialising a DLT receiver structure
+    ///
+    /// `receiver` - pointer to DLT receiver structure
+    ///
+    /// `_fd` - handle to file/socket/fifo, from which the data should be received
+    ///
+    /// `_buffersize` - size of the data buffer for storing the received data
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_receiver_init(receiver: *mut DltReceiver, _fd: c_int, _buffersize: c_int) -> DltReturnValue;
+
+    /// De-Initialize a DLT receiver structure
+    ///
+    /// `receiver` - pointer to DLT receiver structure
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_receiver_free(receiver: *mut DltReceiver) -> DltReturnValue;
     pub fn dlt_receiver_receive_socket(receiver: *mut DltReceiver) -> c_int;
     pub fn dlt_receiver_receive_fd(receiver: *mut DltReceiver) -> c_int;
