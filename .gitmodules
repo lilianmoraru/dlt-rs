@@ -1,0 +1,3 @@
+[submodule "dlt-sys/dlt-daemon"]
+	path = dlt-sys/dlt-daemon
+	url = https://github.com/GENIVI/dlt-daemon
