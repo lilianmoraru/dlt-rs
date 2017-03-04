@@ -3,8 +3,20 @@ extern crate cmake;
 
 use std::string::String;
 use std::collections::HashMap;
+use std::path::Path;
+use std::process::Command;
 
 fn main() {
+    // Making sure that the `dlt-daemon` submodule is available when trying to compile it
+    if !Path::new("dlt-daemon/.git").exists() {
+        let _ = Command::new("git").args(&["submodule", "update", "--init"])
+                                   .status()
+                                   .expect(
+                                    &format!("Failed to initialize the \"dlt-daemon\" submodule. {}{}",
+                                             "Make sure you have \"Git\" installed or that you don't ",
+                                             "have issues with the internet(cloning from GitHub)"));
+    }
+
     // Register `dlt_sys` default values for the DLT CMake flags
     let mut cmake_options = register_cmake_defaults();
 
