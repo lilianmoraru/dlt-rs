@@ -689,41 +689,386 @@ extern {
     /// ### Returns
     /// Negative value if there was an error
     pub fn dlt_receiver_free(receiver: *mut DltReceiver) -> DltReturnValue;
+
+    /// Receive data from socket using the DLT receiver structure
+    ///
+    /// `receiver` - pointer to DLT receiver structure
+    ///
+    /// ### Returns
+    /// Number of received bytes or negative value if there was an error
     pub fn dlt_receiver_receive_socket(receiver: *mut DltReceiver) -> c_int;
+
+    /// Receive data from file/FIFO using the DLT receiver structure
+    ///
+    /// `receiver` - pointer to DLT receiver structure
+    ///
+    /// ### Returns
+    /// Number of received bytes or negative value if there was an error
     pub fn dlt_receiver_receive_fd(receiver: *mut DltReceiver) -> c_int;
+
+    /// Remove a specific size of bytes from the received data
+    ///
+    /// `receiver` - pointer to DLT reciever structure
+    ///
+    /// `size` - amount of bytes to be removed
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_receiver_remove(receiver: *mut DltReceiver, size: c_int) -> DltReturnValue;
+
+    /// Move data from last recieve call to front of receive buffer
+    ///
+    /// `receiver` - pointer to DLT reciever structure
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_receiver_move_to_begin(receiver: *mut DltReceiver) -> DltReturnValue;
+
+    /// Check whether to_get amount of data is available in receiver and
+    /// copy it to dest. Skip the DltUserHeader if skip_header is set to 1.
+    ///
+    /// `receiver` - pointer to DLT receiver structure
+    ///
+    /// `dest` - pointer to the destination buffer
+    ///
+    /// `to_get` - size of the data to copy in dest
+    ///
+    /// `skip_header` - whether the DltUserHeader must be skipped
     pub fn dlt_receiver_check_and_get(receiver: *mut DltReceiver, dest: *mut c_void, to_get: c_uint, skip_header: c_uint) -> c_int;
+
+    /// Fill out storage header of a DLT message
+    ///
+    /// `storageheader` - pointer to storage header to a DLT message
+    ///
+    /// `ecu` - name of ecu to be set in storage header
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_set_storageheader(storageheader: *mut DltStorageHeader, ecu: *const c_char) -> DltReturnValue;
+
+    /// Check if a storage header contains its marker
+    ///
+    /// `storageheader` - pointer to storage header of a DLT message
+    ///
+    /// ### Returns
+    /// `0` - no, `1` - yes, negative value if there was an error
     pub fn dlt_check_storageheader(storageheader: *mut DltStorageHeader) -> DltReturnValue;
+
+    /// Initialize static ringbuffer with a size of size.
+    /// Initialise as server. Init counters.
+    /// Memory is already allocated.
+    ///
+    /// `buf` - pointer to ringbuffer structure
+    ///
+    /// `ptr` - ptr to ringbuffer memory
+    ///
+    /// `size` - maximum size of buffer in bytes
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_buffer_init_static_server(buf: *mut DltBuffer, ptr: *const c_uchar, size: u32) -> DltReturnValue;
+
+    /// Initialize static ringbuffer with a size of size.
+    /// Initialize as a client. Do not change counters.
+    /// Memory is already allocated.
+    ///
+    /// `buf` - pointer to ringbuffer structure
+    ///
+    /// `ptr` - ptr to ringbuffer memory
+    ///
+    /// `size` - maximum size of buffer in bytes
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_buffer_init_static_client(buf: *mut DltBuffer, ptr: *const c_uchar, size: u32) -> DltReturnValue;
+
+    /// Initialize dynamic ringbuffer with a size of size.
+    /// Initialize as a client. Do not change counters.
+    /// Memory will be allocated starting with min_size.
+    /// If more memory is needed, size is increased with step_size.
+    /// The maximum size is max_size.
+    ///
+    /// `buf` - pointer to ringbuffer structure
+    ///
+    /// `min_size` - minimum size of buffer in bytes
+    ///
+    /// `max_size` - maximum size of buffer in bytes
+    ///
+    /// `step_size` - size of which ringbuffer is increased
+    ///
+    /// ### Returns
+    /// Negative  value if there was an error
     pub fn dlt_buffer_init_dynamic(buf: *mut DltBuffer, min_size: u32, max_size: u32, step_size: u32) -> DltReturnValue;
+
+    /// Deinitialize usage of the static ringbuffer
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_buffer_free_static(buf: *mut DltBuffer) -> DltReturnValue;
+
+    /// Release and free memory used by the dynamic ringbuffer
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_buffer_free_dynamic(buf: *mut DltBuffer) -> DltReturnValue;
+
+    /// Write one entry to the ringbuffer
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// `data` - pointer to data to be written into the ringbuffer
+    ///
+    /// `size` - size of data in bytes to be written into the ringbuffer
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_buffer_push(buf: *mut DltBuffer, data: *const c_uchar, size: c_uint) -> DltReturnValue;
+
+    /// Write up to three entries to ringbuffer.
+    /// Entries are joined to one block.
+    ///
+    /// `dlt` - pointer to the ringbuffer structure
+    ///
+    /// `data[1-3]` - pointer to the data to be written into the ringbuffer
+    ///
+    /// `size[1-3]` - size of the data in bytes to be written into the ringbuffer
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_buffer_push3(buf: *mut DltBuffer, data1: *const c_uchar, size1: c_uint, data2: *const c_uchar, size2: c_uint, data3: *const c_uchar, size3: c_uint) -> DltReturnValue;
+
+    /// Read one entry from ringbuffer.
+    /// Remove it from ringbuffer.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// `data` - pointer to data read from ringbuffer
+    ///
+    /// `max_size` - max size of data in bytes from ringbuffer
+    ///
+    /// ### Returns
+    /// Size of read data, zero if no data available, negative value if there was an error
     pub fn dlt_buffer_pull(buf: *mut DltBuffer, data: *mut c_uchar, max_size: c_int) -> c_int;
+
+    /// Read one entry from ringbuffer.
+    /// Do not remove it from ringbuffer.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// `data` - pointer to data read from ringbuffer
+    ///
+    /// `max_size` - max size of read data in bytes from ringbuffer
+    ///
+    /// ### Returns
+    /// Size of read data, zero if no data available, negative value if there was an error
     pub fn dlt_buffer_copy(buf: *mut DltBuffer, data: *mut c_uchar, max_size: c_int) -> c_int;
+
+    /// Remove entry from ringbuffer.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// ### Returns
+    /// Size of read data, zero if no data available, negative value if there was an error
     pub fn dlt_buffer_remove(buf: *mut DltBuffer) -> c_int;
+
+    /// Print information about buffer and log to internal DLT log.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
     pub fn dlt_buffer_info(buf: *mut DltBuffer);
+
+    /// Print status of buffer and log to internal DLT log.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
     pub fn dlt_buffer_status(buf: *mut DltBuffer);
+
+    /// Get total size in bytes of ringbuffer.
+    /// If buffer is dynamic, max size is returned.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// ### Returns
+    /// Total size of buffer
     pub fn dlt_buffer_get_total_size(buf: *mut DltBuffer) -> u32;
+
+    /// Get used size in bytes of ringbuffer.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// ### Returns
+    /// Used size of buffer
     pub fn dlt_buffer_get_used_size(buf: *mut DltBuffer) -> c_int;
+
+    /// Get number of entries in the ringbuffer.
+    ///
+    /// `buf` - pointer to the ringbuffer structure
+    ///
+    /// ### Returns
+    /// Number of entries
     pub fn dlt_buffer_get_message_count(buf: *mut DltBuffer) -> c_int;
-    #[cfg(not(target_os = "windows"))] pub fn dlt_setup_serial(fd: c_int, speed: speed_t) -> DltReturnValue;
-    #[cfg(not(target_os = "windows"))] pub fn dlt_convert_serial_speed(baudrate: c_int) -> speed_t;
-    #[cfg(not(target_os = "windows"))] pub fn dlt_get_version(buf: *mut c_char, size: size_t);
-    #[cfg(not(target_os = "windows"))] pub fn dlt_get_major_version(buf: *mut c_char, size: size_t);
-    #[cfg(not(target_os = "windows"))] pub fn dlt_get_minor_version(buf: *mut c_char, size: size_t);
+
+    // non-Windows specific functions can be found lower in the "non_windows" module
+
+    // DLT internal functions
+    /// Common port of initialization
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_init_common() -> DltReturnValue;
+
+    /// Return the uptime of the system in 0.1 ms resolution
+    ///
+    /// ### Returns
+    /// `0` - if there was an error
     pub fn dlt_uptime() -> u32;
+
+    /// Print header of a DLT message
+    ///
+    /// `message` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the header is written
+    ///
+    /// `size` - maximum size of the text buffer
+    ///
+    /// `verbose` - if set to `true`, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_print_header(message: *mut DltMessage, text: *mut c_char, size: u32, verbose: c_int) -> DltReturnValue;
+
+    /// Print payload of a DLT message as Hex-Output
+    ///
+    /// `message` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the output is written
+    ///
+    /// `size` - maximum size of the text buffer
+    ///
+    /// `verbose` - if set to `true`, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_print_hex(message: *mut DltMessage, text: *mut c_char, size: u32, verbose: c_int) -> DltReturnValue;
+
+    /// Print payload of a DLT message as ASCII-Output
+    ///
+    /// `message` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the output is written
+    ///
+    /// `size` - maximum size of the text buffer
+    ///
+    /// `verbose` - if set to `true`, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_print_ascii(message: *mut DltMessage, text: *mut c_char, size: u32, verbose: c_int) -> DltReturnValue;
+
+    /// Print payload of a DLT message as Mixed-Output(Hex and ASCII), for plain text output
+    ///
+    /// `message` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the output is written
+    ///
+    /// `size` - maximum size of the buffer
+    ///
+    /// `verbose` - if set to `true`, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_print_mixed_plain(message: *mut DltMessage, text: *mut c_char, size: u32, verbose: c_int) -> DltReturnValue;
+
+    /// Print payload of a DLT message as Mixed-Output(Hex and ASCII), for HTML text output
+    ///
+    /// `message` - pointer to structure of organising access to DLT messages
+    ///
+    /// `text` - pointer to an ASCII string, in which the output is written
+    ///
+    /// `size` - maximum size of the text buffer
+    ///
+    /// `verbose` - if set to `true`, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_print_mixed_html(message: *mut DltMessage, text: *mut c_char, size: u32, verbose: c_int) -> DltReturnValue;
+
+    /// Decode and print an argument of a DLT message
+    ///
+    /// `msg` - pointer to structure of organising access to DLT messages
+    ///
+    /// `type_info` - type of argument
+    ///
+    /// `ptr` - pointer to pointer to data(pointer to data is changed within' this function)
+    ///
+    /// `datalength` - pointer to datalength(datalength is changed within' this function)
+    ///
+    /// `text` - pointer to an ASCII string, in which the output is written
+    ///
+    /// `textlength` - maximum size of the text buffer
+    ///
+    /// `byteLength` - if argument is a string, and this value is `0` or greater, this value will be taken as string length
+    ///
+    /// `verbose` - if set to `true`, verbose information is printed out
+    ///
+    /// ### Returns
+    /// Negative value if there was an error
     pub fn dlt_message_argument_print(msg: *mut DltMessage, type_info: u32, ptr: *mut *mut u8, datalength: *mut i32, text: *mut c_char, textlength: c_int, byteLength: c_int, verbose: c_int) -> DltReturnValue;
+
+    /// Check environment variables
     pub fn dlt_check_envvar();
+
+    /// Create the specified path, recursive if necessary.
+    /// Behaves like calling `mkdir -p <dir>` in the terminal
     pub fn dlt_mkdir_recursive(dir: *const c_char) -> c_int;
 }
+
+#[cfg(not(target_os = "windows"))]
+mod non_windows {
+    use super::*;
+    extern "C" {
+        /// Helper function: Setup serial connection
+        ///
+        /// `fd` - file descriptor of serial tty device
+        ///
+        /// `speed` - serial line speed, as defined in termios.h
+        ///
+        /// ### Returns
+        /// Negative value if there was an error
+        pub fn dlt_setup_serial(fd: c_int, speed: speed_t) -> DltReturnValue;
+
+        /// Helper function: Convert serial line baudrate(as number) to line speed(as defined in termios.h)
+        ///
+        /// `baudrate` - serial line baudrate(as number)
+        ///
+        /// ### Returns
+        /// Serial line speed, as defined in termios.h
+        pub fn dlt_convert_serial_speed(baudrate: c_int) -> speed_t;
+
+        /// Print DLT version and DLT git version to buffer
+        ///
+        /// `buf` - pointer to buffer
+        ///
+        /// `size` - size of buffer
+        pub fn dlt_get_version(buf: *mut c_char, size: size_t);
+
+        /// Print DLT major version to buffer
+        ///
+        /// `buf` - pointer to buffer
+        ///
+        /// `size` - size of buffer
+        pub fn dlt_get_major_version(buf: *mut c_char, size: size_t);
+
+        /// Print DLT minor version to buffer
+        ///
+        /// `buf` - pointer to buffer
+        ///
+        /// `size` - size of buffer
+        pub fn dlt_get_minor_version(buf: *mut c_char, size: size_t);
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub use self::non_windows::*;
