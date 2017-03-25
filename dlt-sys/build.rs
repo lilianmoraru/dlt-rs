@@ -6,15 +6,16 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;
 
+type CMakeOptions = HashMap<String, String>;
+
 fn main() {
     // Making sure that the `dlt-daemon` submodule is available when trying to compile it
     if !Path::new("dlt-daemon/.git").exists() {
         let _ = Command::new("git").args(&["submodule", "update", "--init"])
                                    .status()
-                                   .expect(
-                                    &format!("Failed to initialize the \"dlt-daemon\" submodule. {}{}",
-                                             "Make sure you have \"Git\" installed or that you don't ",
-                                             "have issues with the internet(cloning from GitHub)"));
+                                   .expect("Failed to initialize the \"dlt-daemon\" submodule. \
+                                            Make sure you have \"Git\" installed or that you don't \
+                                            have issues with the internet(cloning from GitHub)");
     }
 
     // Register `dlt_sys` default values for the DLT CMake flags
@@ -43,6 +44,7 @@ fn main() {
     }
 
     let cmake_options = cmake_options;
+    configure_dlt_features(&cmake_options);
 
     let mut dst = cmake::Config::new("dlt-daemon");
     for (key, value) in &cmake_options {
@@ -65,7 +67,8 @@ fn main() {
                   format!("{}/../../../dlt-daemon", dst.display())).unwrap();
 }
 
-fn register_cmake_defaults() -> HashMap<String, String> {
+//          =============== Helpers ===============
+fn register_cmake_defaults() -> CMakeOptions {
     use std::str::FromStr;
 
     let mut cmake_options = HashMap::new();
@@ -77,6 +80,7 @@ fn register_cmake_defaults() -> HashMap<String, String> {
             ("DLT_SYS_WITH_DOC",                 "OFF"),
             ("DLT_SYS_WITH_MAN",                 "OFF"),
             ("DLT_SYS_WTIH_DLT_ADAPTOR",         "OFF"), // Yes, "WTIH" :)
+            ("DLT_SYS_WITH_DLT_ADAPTOR",         "OFF"), // Lets add this in case the flag is fixed
             ("DLT_SYS_WITH_DLT_CONSOLE",         "OFF"),
             ("DLT_SYS_WITH_DLT_EXAMPLES",        "OFF"),
             ("DLT_SYS_WITH_DLT_SYSTEM",          "OFF"),
@@ -126,15 +130,48 @@ fn validate_cmake_option(key: &str, value: &str) {
     }
 }
 
-fn is_cmake_option_activated(cmake_options: &HashMap<String, String>, key: &str) -> bool {
-    if let Some(value) = cmake_options.get(key) {
-        let expected_options = ["1", "ON", "TRUE", "Y", "YES"];
-        if let Ok(_) = expected_options.binary_search(&value.as_str()) {
-            return true;
-        }
+fn is_cmake_value_on(value: &str) -> bool {
+    let expected_options = ["1", "ON", "TRUE", "Y", "YES"];
+    if let Ok(_) = expected_options.binary_search(&value) {
+        true
+    } else {
+        false
+    }
+}
 
-        return false;
+fn is_cmake_option_activated(cmake_options: &CMakeOptions, key: &str) -> bool {
+    if let Some(value) = cmake_options.get(key) {
+        return is_cmake_value_on(value.as_str());
     }
 
     false
+}
+
+fn configure_dlt_features(cmake_options: &CMakeOptions) {
+    fn add_cfg(cfg: &str) {
+        println!("cargo:rustc-cfg={}", cfg);
+    }
+
+    for (key, value) in cmake_options {
+        if is_cmake_value_on(value.as_str()) {
+            // Follows the order of the checks in the CMakeLists.txt file
+            match key.as_str() {
+                "DLT_SYS_WITH_DLT_SYSTEM" => {}, // find_package(ZLIB REQUIRED)
+                "DLT_SYS_WITH_DLT_DBUS" => {}, // pkg_check_modules(DBUS REQUIRED dbus-1)
+                "DLT_SYS_WITH_DLTTEST" => {}, // add_definitions
+                "DLT_SYS_WITH_DLT_UNIT_TESTS" => {}, // add_definitions
+                "DLT_SYS_WITH_DLT_SHM_ENABLE" => {}, // add_definitions
+                "DLT_SYS_WITH_DLT_USE_IPv6" => {}, // add_definitions
+                "DLT_SYS_WITH_GPROF" => {}, // CMAKE_C_FLAGS = "-pg"
+                "DLT_SYS_WITH_DOC" => {},
+                "DLT_SYS_WITH_DLT_CXX11_EXT" => {},
+                "DLT_SYS_CMAKE_INSTALL_PREFIX" => {},
+                "DLT_SYS_WITH_SYSTEMD" => {},
+                "DLT_SYS_WITH_SYSTEMD_WATCHDOG" => {},
+                "DLT_SYS_WITH_SYSTEMD_JOURNAL" => {},
+                "DLT_SYS_WITH_DLT_UNIT_TESTS" => {},
+                _ => {}
+            }
+        }
+    }
 }
