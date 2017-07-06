@@ -36,7 +36,7 @@ pub struct DltShmBlockHead {
     pub size: c_int
 }
 
-extern {
+extern "C" {
     /// Initialise the shared memory on the client side.
     /// This function must be called before using further shm functions.
     ///
@@ -175,4 +175,3 @@ extern {
     /// Negative value if there was an error
     pub fn dlt_shm_free_server(buf: *mut DltShm) -> c_int;
 }
-

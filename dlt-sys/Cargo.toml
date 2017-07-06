@@ -16,5 +16,5 @@ description   = "FFI bindings for GENIVI DLT"
 libc    = "0.2"
 
 [build-dependencies]
-dotenv = "0.8"
+dotenv = "0.10"
 cmake = "0.1"

@@ -188,7 +188,7 @@ pub struct DltUser {
     // #endif
 }
 
-extern {
+extern "C" {
     pub fn dlt_user_log_write_start(handle: *mut DltContext, log: *mut DltContextData, loglevel: DltLogLevelType) -> DltReturnValue;
     pub fn dlt_user_log_write_start_id(handle: *mut DltContext, log: *mut DltContextData, loglevel: DltLogLevelType, messageid: u32) -> DltReturnValue;
     pub fn dlt_user_log_write_finish(log: *mut DltContextData) -> DltReturnValue;

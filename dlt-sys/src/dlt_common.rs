@@ -8,7 +8,7 @@ pub const DLT_ID_SIZE:    usize = 4;
 /// Maximum number of filters
 pub const DLT_FILTER_MAX: usize = 30;
 
-extern {
+extern "C" {
     /// The definition of the serial header containing the characters "DLS" + 0x01.
     #[link_name = "dltSerialHeader"]
     pub static mut dltSerialHeader: [c_char; DLT_ID_SIZE];
@@ -201,7 +201,7 @@ pub struct DltBuffer {
     pub step_size: u32
 }
 
-extern {
+extern "C" {
     /// Helper function to print a byte array in hex.
     ///
     /// `ptr` - pointer to the byte array
