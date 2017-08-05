@@ -56,10 +56,14 @@ fn main() {
     let dst = dst.build();
 
     if is_cmake_option_activated(&cmake_options, "DLT_SYS_BUILD_SHARED_LIBS") {
+        println!("cargo:rustc-link-search=native={}/build/dlt-build/lib64", dst.display());
         println!("cargo:rustc-link-search=native={}/build/dlt-build/lib", dst.display());
+        println!("cargo:rustc-link-search=native={}/src/lib", dst.display());
         println!("cargo:rustc-link-lib=dlt");
     } else {
+        println!("cargo:rustc-link-search=native={}/build/dlt-build/lib64/static", dst.display());
         println!("cargo:rustc-link-search=native={}/build/dlt-build/lib/static", dst.display());
+        println!("cargo:rustc-link-search=native={}/src/lib", dst.display());
         println!("cargo:rustc-link-lib=static=dlt");
     }
 
