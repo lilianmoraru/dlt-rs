@@ -1,10 +1,12 @@
-extern crate dotenv;
+extern crate bindgen;
 extern crate cmake;
+extern crate dotenv;
 
-use std::string::String;
 use std::collections::HashMap;
+use std::env;
 use std::path::Path;
 use std::process::Command;
+use std::string::String;
 
 type CMakeOptions = HashMap<String, String>;
 
@@ -17,6 +19,9 @@ fn main() {
                                             Make sure you have \"Git\" installed or that you don't \
                                             have issues with the internet(cloning from GitHub)");
     }
+
+    let target = env::var("TARGET").expect("Cargo build scripts always have TARGET");
+    let host   = env::var("HOST").expect("Cargo build scripts always have HOST");
 
     // Register `dlt_sys` default values for the DLT CMake flags
     let mut cmake_options = register_cmake_defaults();
@@ -54,6 +59,8 @@ fn main() {
     }
 
     let dst = dst.build();
+
+    generate_bindings(&target, &host, &[""]);
 
     if is_cmake_option_activated(&cmake_options, "DLT_SYS_BUILD_SHARED_LIBS") {
         println!("cargo:rustc-link-search=native={}/build/dlt-build/lib64", dst.display());
@@ -110,7 +117,10 @@ fn register_cmake_defaults() -> CMakeOptions {
             panic!("Incorrect dlt_sys CMake option(variable name): {}", key);
         }
 
-        if key.starts_with("DLT_SYS_WITH_") || key == "DLT_SYS_BUILD_SHARED_LIBS" {
+        if key.starts_with("DLT_SYS_WITH_")
+            || key == "DLT_SYS_WTIH_DLT_ADAPTOR"
+            || key == "DLT_SYS_BUILD_SHARED_LIBS"
+        {
             validate_cmake_option(key, value);
         }
 
@@ -178,4 +188,10 @@ fn configure_dlt_features(cmake_options: &CMakeOptions) {
             }
         }
     }
+}
+
+fn generate_bindings<S>(target: &str, host: &str, headers_paths: &[S])
+    where S: AsRef<str> + Sized
+{
+    ()
 }

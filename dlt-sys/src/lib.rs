@@ -18,7 +18,7 @@ fn hello_from_rust() {
     use std::ptr;
 
     let dlt_major_version = CString::new("2").unwrap();
-    let dlt_minor_version = CString::new("16").unwrap();
+    let dlt_minor_version = CString::new("17").unwrap();
     unsafe {
         // DLT_REGISTER_APP
         dlt_check_library_version(dlt_major_version.as_ptr(),
