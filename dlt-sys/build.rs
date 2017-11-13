@@ -2,13 +2,31 @@ extern crate bindgen;
 extern crate cmake;
 extern crate dotenv;
 
+use bindgen::callbacks::{ ParseCallbacks, IntKind };
 use std::collections::HashMap;
 use std::env;
-use std::path::Path;
+use std::path::{ Path, PathBuf };
 use std::process::Command;
 use std::string::String;
 
 type CMakeOptions = HashMap<String, String>;
+
+// Used in bindgen's "parse_callbacks"
+#[derive(Debug)]
+struct DltMacroTypes;
+
+impl ParseCallbacks for DltMacroTypes {
+    fn int_macro(&self, name: &str, _value: i64) -> Option<IntKind> {
+        // Sorted
+        let macros = &["DLT_ID_SIZE", "DLT_USER_BUF_MAX_SIZE", "DLT_USER_RESENDBUF_MAX_SIZE"];
+
+        if let Ok(_) = macros.binary_search(&name) {
+            Some(IntKind::Custom { name: "usize", is_signed: false })
+        } else {
+            None
+        }
+    }
+}
 
 fn main() {
     // Making sure that the `dlt-daemon` submodule is available when trying to compile it
@@ -60,8 +78,6 @@ fn main() {
 
     let dst = dst.build();
 
-    generate_bindings(&target, &host, &[""]);
-
     if is_cmake_option_activated(&cmake_options, "DLT_SYS_BUILD_SHARED_LIBS") {
         println!("cargo:rustc-link-search=native={}/build/dlt-build/lib64", dst.display());
         println!("cargo:rustc-link-search=native={}/build/dlt-build/lib", dst.display());
@@ -73,6 +89,9 @@ fn main() {
         println!("cargo:rustc-link-search=native={}/src/lib", dst.display());
         println!("cargo:rustc-link-lib=static=dlt");
     }
+
+    // Generating bindings after CMake build, so we can use the final headers installed by CMake
+    generate_bindings(&target, &host);
 
     std::fs::copy(format!("{}/build/dlt-build/bin/dlt-daemon", dst.display()),
                   format!("{}/../../../dlt-daemon", dst.display())).unwrap();
@@ -190,8 +209,55 @@ fn configure_dlt_features(cmake_options: &CMakeOptions) {
     }
 }
 
-fn generate_bindings<S>(target: &str, host: &str, headers_paths: &[S])
-    where S: AsRef<str> + Sized
+fn generate_bindings(target: &str, host: &str)
 {
-    ()
+    let target_os    = target.splitn(3, "-").nth(2).unwrap();
+    let mut bindings = bindgen::Builder::default();
+
+    if target != host {
+        bindings = bindings.clang_args(&["--target", target.clone()]);
+    }
+
+    let out_dir     = env::var("OUT_DIR").unwrap();
+    let out_dir     = PathBuf::from(&out_dir);
+    let include_dir = out_dir.join("build/dlt-build/include/dlt");
+
+    bindings = bindings.clang_arg(format!("-I{}", include_dir.display()));
+
+    if target_os == "windows-msvc" {
+        // There are so many possible paths, it is hard to make this work on
+        // everybody's PC(take into consideration this: what if the user doesn't install on
+        // C:? Different SDKs? Different MSVC versions? etc...).
+        // I remember reading some code from Rust or Rustup where it reads from the registry
+        // to find the correct path, but I cannot find it at the moment.
+        panic!("I don't know all the correct include paths for Windows. \
+                Please open an issue if you think you would really like \
+                this to be implemented or consider helping with the \
+                implementation(I don't have access to a Windows machine).");
+    }
+
+    let header_path = |header| -> String {
+        include_dir.join(&header).into_os_string().into_string().unwrap()
+    };
+
+    let bindings = bindings
+        .header(header_path("dlt_version.h"))
+        .header(header_path("dlt_types.h"))
+        .header(header_path("dlt_protocol.h"))
+        .header(header_path("dlt_user_macros.h"))
+        .header(header_path("dlt_common.h"))
+        .header(header_path("dlt_shm.h"))
+        .header(header_path("dlt_user.h"))
+        .header(header_path("dlt.h"))
+        .header(header_path("dlt_filetransfer.h"))
+        .header(header_path("dlt_common_api.h"))
+        .header(header_path("dlt_client.h"))
+        .header(header_path("dlt_offline_trace.h"))
+        .parse_callbacks(Box::new(DltMacroTypes))
+        .generate()
+        .expect("Failed to generate bindings!");
+
+    bindings
+        .write_to_file(out_dir.join("bindings.rs"))
+        .expect("Failed to generate bindings!");
 }
