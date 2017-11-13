@@ -2,12 +2,13 @@ extern crate bindgen;
 extern crate cmake;
 extern crate dotenv;
 
-use bindgen::callbacks::{ ParseCallbacks, IntKind };
 use std::collections::HashMap;
 use std::env;
 use std::path::{ Path, PathBuf };
 use std::process::Command;
 use std::string::String;
+
+use bindgen::callbacks::{ ParseCallbacks, IntKind };
 
 type CMakeOptions = HashMap<String, String>;
 
@@ -18,7 +19,15 @@ struct DltMacroTypes;
 impl ParseCallbacks for DltMacroTypes {
     fn int_macro(&self, name: &str, _value: i64) -> Option<IntKind> {
         // Sorted
-        let macros = &["DLT_ID_SIZE", "DLT_USER_BUF_MAX_SIZE", "DLT_USER_RESENDBUF_MAX_SIZE"];
+        let macros = &[
+            "DLT_ENTRY_MAX",
+            "DLT_ID_SIZE",
+            "DLT_MOUNT_PATH_MAX",
+            "DLT_USER_BUF_MAX_SIZE",
+            "DLT_USER_RESENDBUF_MAX_SIZE",
+            "NAME_MAX",
+            "PATH_MAX"
+        ];
 
         if let Ok(_) = macros.binary_search(&name) {
             Some(IntKind::Custom { name: "usize", is_signed: false })
