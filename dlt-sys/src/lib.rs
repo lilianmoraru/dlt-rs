@@ -9,20 +9,20 @@ pub unsafe fn dlt_user_is_logLevel_enabled(handle: *mut DltContext,
                                            loglevel: DltLogLevelType) -> DltReturnValue {
     let handle = handle.as_ref();
     if handle.is_none() {
-        return DltReturnValue_DLT_RETURN_WRONG_PARAMETER;
+        return DltReturnValue::DLT_RETURN_WRONG_PARAMETER;
     }
 
     let log_level_ptr = handle.unwrap().log_level_ptr;
     if log_level_ptr.is_null() {
-        return DltReturnValue_DLT_RETURN_WRONG_PARAMETER;
+        return DltReturnValue::DLT_RETURN_WRONG_PARAMETER;
     }
 
     let log_level = log_level_ptr.as_ref().unwrap();
-    if loglevel as i8 <= *log_level && loglevel != DltLogLevelType_DLT_LOG_OFF {
-        return DltReturnValue_DLT_RETURN_TRUE;
+    if loglevel as i8 <= *log_level && loglevel != DltLogLevelType::DLT_LOG_OFF {
+        return DltReturnValue::DLT_RETURN_TRUE;
     }
 
-    DltReturnValue_DLT_RETURN_LOGGING_DISABLED
+    DltReturnValue::DLT_RETURN_LOGGING_DISABLED
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn hello_from_rust() {
                              CString::new("Rusty test").unwrap().as_ptr());
 
         // DLT_LOG
-        if dlt_user_is_logLevel_enabled(&mut testing, DltLogLevelType_DLT_LOG_INFO) == DltReturnValue_DLT_RETURN_TRUE {
+        if dlt_user_is_logLevel_enabled(&mut testing, DltLogLevelType::DLT_LOG_INFO) == DltReturnValue::DLT_RETURN_TRUE {
             let mut log_local = DltContextData {
                 handle: ptr::null_mut(),
                 buffer: [0; DLT_USER_BUF_MAX_SIZE],
@@ -65,7 +65,7 @@ fn hello_from_rust() {
                 context_description: ptr::null_mut()
             };
 
-            let dlt_local: libc::c_int = dlt_user_log_write_start(&mut testing, &mut log_local, DltLogLevelType_DLT_LOG_INFO) as i32;
+            let dlt_local: libc::c_int = dlt_user_log_write_start(&mut testing, &mut log_local, DltLogLevelType::DLT_LOG_INFO) as i32;
             if dlt_local > 0 {
                 // DLT_CSTRING
                 dlt_user_log_write_constant_string(&mut log_local,

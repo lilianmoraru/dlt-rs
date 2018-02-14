@@ -264,6 +264,7 @@ fn generate_bindings(target: &str, host: &str)
         .header(header_path("dlt_offline_trace.h"))
         .generate_comments(true)
         .trust_clang_mangling(false)
+        .rustified_enum(".*")
         .parse_callbacks(Box::new(DltMacroTypes))
         .generate()
         .expect("Failed to generate bindings!");
